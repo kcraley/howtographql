@@ -30,3 +30,31 @@ func (link Link) Save() int64 {
 	log.Print("row inserted")
 	return id
 }
+
+func GetAll() []Link {
+	stmt, err := database.Db.Prepare("select id, title, address from Links")
+	if err != nil {
+		log.Fatalf("failed preparing query to get all links: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		log.Fatalf("failed preforming query to get all links: %v", err)
+	}
+	defer rows.Close()
+
+	var links []Link
+	for rows.Next() {
+		var link Link
+		err := rows.Scan(&link.ID, &link.Title, &link.Address)
+		if err != nil {
+			log.Fatalf("failed scanning row: %v", err)
+		}
+		links = append(links, link)
+	}
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return links
+}
