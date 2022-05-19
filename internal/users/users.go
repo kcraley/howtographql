@@ -15,6 +15,26 @@ type User struct {
 	Password string `json:"password"`
 }
 
+// Authenticate authenticates a user.
+func (user *User) Authenticate() bool {
+	stmt, err := database.Db.Prepare("select Password from Users WHERE Username = ?")
+	if err != nil {
+		log.Fatalf("failed preparing query for getting the user's password: %v", err)
+	}
+	row := stmt.QueryRow(user.Username)
+
+	var hashedPassword string
+	err = row.Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatalf("failed to authenticate user: %v", err)
+		}
+	}
+	return CheckPassword(user.Password, hashedPassword)
+}
+
 // Create creates the given user by inserting a new entry into the Users table.
 func (user *User) Create() {
 	stmt, err := database.Db.Prepare("INSERT INTO Users(Username, Password) VALUES(?,?)")
