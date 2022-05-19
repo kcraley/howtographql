@@ -53,6 +53,10 @@ func GetAll() []Link {
 		if err != nil {
 			log.Fatalf("failed scanning row: %v", err)
 		}
+		link.User = &users.User{
+			ID:       id,
+			Username: username,
+		}
 		links = append(links, link)
 	}
 	if err = rows.Err(); err != nil {
