@@ -10,20 +10,32 @@ import (
 
 	"github.com/kcraley/howtographql/graph/generated"
 	"github.com/kcraley/howtographql/graph/model"
+	"github.com/kcraley/howtographql/internal/auth"
 	"github.com/kcraley/howtographql/internal/links"
 	"github.com/kcraley/howtographql/internal/users"
 	"github.com/kcraley/howtographql/pkg/jwt"
 )
 
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return &model.Link{}, fmt.Errorf("access denied")
+	}
+
 	var link links.Link
 	link.Title = input.Title
 	link.Address = input.Address
+	link.User = user
 	linkID := link.Save()
+	graphqlUser := &model.User{
+		ID:   user.ID,
+		Name: user.Username,
+	}
 	return &model.Link{
 		ID:      strconv.FormatInt(linkID, 10),
 		Title:   link.Title,
 		Address: link.Address,
+		User:    graphqlUser,
 	}, nil
 }
 
