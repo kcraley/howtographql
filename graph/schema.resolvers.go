@@ -11,6 +11,8 @@ import (
 	"github.com/kcraley/howtographql/graph/generated"
 	"github.com/kcraley/howtographql/graph/model"
 	"github.com/kcraley/howtographql/internal/links"
+	"github.com/kcraley/howtographql/internal/users"
+	"github.com/kcraley/howtographql/pkg/jwt"
 )
 
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
@@ -26,7 +28,15 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) 
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user users.User
+	user.Username = input.Username
+	user.Password = input.Password
+	user.Create()
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
