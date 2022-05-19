@@ -5,8 +5,10 @@ go 1.17
 require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/vektah/gqlparser/v2 v2.4.2
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 )
 
 require (
