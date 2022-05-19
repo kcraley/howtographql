@@ -1,6 +1,7 @@
 package users
 
 import (
+	"database/sql"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -42,4 +43,23 @@ func HashPassword(password string) (string, error) {
 func CheckPassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+// GetUserIdByUsername checks if a user exists in the database given a username.
+func GetUserIdByUsername(username string) (int, error) {
+	stmt, err := database.Db.Prepare("select ID from Users WHERE Username = ?")
+	if err != nil {
+		log.Fatalf("failed preparing query to get user by id: %v", err)
+	}
+	row := stmt.QueryRow(username)
+
+	var Id int
+	err = row.Scan(&Id)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Printf("unable to find user: %v", err)
+		}
+		return 0, err
+	}
+	return Id, nil
 }
