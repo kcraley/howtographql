@@ -40,7 +40,18 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user users.User
+	user.Username = input.Username
+	user.Password = input.Password
+	correct := user.Authenticate()
+	if !correct {
+		return "", &users.WrongUsernameOrPasswordError{}
+	}
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
